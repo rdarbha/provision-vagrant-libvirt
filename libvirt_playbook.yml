@@ -22,7 +22,7 @@
     with_items:
       - virsh pool-define-as --name default --type dir --target /var/lib/libvirt/images
       - virsh pool-autostart default
-      - virsh pool-build default
+      # - virsh pool-build default
       - virsh pool-start default
 
   - name: Install latest Vagrant (1.8.5 as of Aug 2016)
