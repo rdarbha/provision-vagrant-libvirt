@@ -4,7 +4,7 @@
   remote_user: root
   tasks:
   - name: Add additional repo for libvirt tunnels
-    apt-repository: repo='ppa:linuxsimba/libvirt-udp-tunnel'
+    apt_repository: repo='ppa:linuxsimba/libvirt-udp-tunnel'
 
   - name: Run apt-get update
     apt: update_cache=yes
@@ -36,3 +36,19 @@
       - vagrant-cumulus
       - vagrant-mutate
       - vagrant-libvirt
+
+---
+- hosts: leaf1
+  vars:
+    description: “this is a leaf switch”
+  remote_user: root
+  tasks:
+  - name: write the quagga config file
+    template: src=quagga.j2 dest=/etc/quagga/Quagga.conf
+    notify:
+    - restart quagga
+  - name: ensure quagga is running
+    service: name=quagga state=started
+  handlers:
+    - name: restart quagga
+      service: name=quagga state=restarted
