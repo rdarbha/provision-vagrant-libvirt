@@ -1,0 +1,38 @@
+---
+
+- hosts: all
+  remote_user: root
+  tasks:
+  - name: Add additional repo for libvirt tunnels
+    apt-repository: repo='ppa:linuxsimba/libvirt-udp-tunnel'
+
+  - name: Run apt-get update
+    apt: update_cache=yes
+
+  - name: Install packages for Libvirt and QEMU
+    apt: name={{item}} state=present
+    with_items:
+      - libvirt-bin
+      - libvirt-dev
+      - qemu-utils
+      - qemu
+
+  - name: Apply virsh commands
+    command: "{{ item }}"
+    with_items:
+      - virsh pool-define-as --name default --type dir --target /var/lib/libvirt/images
+      - virsh pool-autostart default
+      - virsh pool-build default
+      - virsh pool-start default
+
+  - name: Install latest Vagrant (1.8.5 as of Aug 2016)
+    apt: deb=https://releases.hashicorp.com/vagrant{{ item }}/vagrant_{{ item }}_x86_64.deb
+    with_items:
+      - 1.8.5
+
+  - name: Install plugins for libvirt
+    command: "vagrant plugin install {{ item }}"
+    with_items:
+      - vagrant-cumulus
+      - vagrant-mutate
+      - vagrant-libvirt
